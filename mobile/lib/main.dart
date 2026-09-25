@@ -76,8 +76,8 @@ void main() async {
     databaseFactory = databaseFactoryFfiWeb;
   }
 
-  // Initialize App Configuration (Development by default)
-  AppConfig.initialize(Environment.development);
+  // Initialize App Configuration (auto-selects production in release mode, development in debug mode)
+  AppConfig.initialize();
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);

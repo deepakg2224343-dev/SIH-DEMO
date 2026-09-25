@@ -1,0 +1,78 @@
+name: Build Android Release APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'Custom API Base URL (optional - defaults to production endpoint)'
+        required: false
+        default: 'https://api.smritisetu.gov.in/api/v1'
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Verify Environment
+        run: |
+          flutter --version
+          java -version
+
+      - name: Ensure Android platform wrapper
+        working-directory: mobile
+        run: |
+          if [ ! -f "android/gradlew" ]; then
+            echo "Generating Android wrapper assets..."
+            flutter create --platforms=android --org com.smritisetu .
+            git checkout android/app/build.gradle android/app/src/main/AndroidManifest.xml android/settings.gradle || true
+          fi
+          chmod +x android/gradlew || true
+
+      - name: Install Flutter Dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Run Static Code Analysis
+        working-directory: mobile
+        run: flutter analyze --no-fatal-infos
+
+      - name: Build Release APK
+        working-directory: mobile
+        run: |
+          API_URL="${{ github.event.inputs.api_base_url || 'https://api.smritisetu.gov.in/api/v1' }}"
+          echo "Building SmritiSetu Release APK with API_BASE_URL=$API_URL"
+          flutter build apk --release \
+            --dart-define=APP_ENV=production \
+            --dart-define=API_BASE_URL="$API_URL"
+
+      - name: Verify APK Output
+        run: |
+          ls -lh mobile/build/app/outputs/flutter-apk/
+
+      - name: Upload SmritiSetu Release APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmritiSetu-Android-APK
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30

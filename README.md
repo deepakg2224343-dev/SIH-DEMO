@@ -82,3 +82,21 @@ cd backend
 npm install
 npm run start:dev
 ```
+
+---
+
+## Build Android APK using GitHub Actions
+
+Follow these practical steps to build and install the release Android APK directly from the cloud without needing Flutter or Android Studio installed on your laptop:
+
+1. Push the project to the existing GitHub repository.
+2. Open GitHub → Actions.
+3. Select the Android APK workflow.
+4. Click Run workflow.
+5. Wait for the build to complete.
+6. Open the successful workflow.
+7. Download the SmritiSetu-Android-APK artifact.
+8. Extract the artifact.
+9. Transfer the .apk to an Android phone.
+10. Install the APK.
+

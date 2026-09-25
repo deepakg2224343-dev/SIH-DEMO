@@ -33,9 +33,15 @@ build/
 !package-lock.json
 
 # Android / iOS / Windows build outputs
-android/app/debug/
-android/app/profile/
-android/app/release/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/local.properties
+.gradle/
+**/android/.gradle/
+*.jks
+*.keystore
+key.properties
 *.apk
 *.aab
 ios/Flutter/Generated.xcconfig

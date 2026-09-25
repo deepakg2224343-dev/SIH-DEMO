@@ -1,5 +1,5 @@
-import '../lib/data/adaptive/adaptive_difficulty_engine.dart';
-import '../lib/domain/services/adaptive_difficulty_service.dart';
+import 'package:smriti_setu/data/adaptive/adaptive_difficulty_engine.dart';
+import 'package:smriti_setu/domain/services/adaptive_difficulty_service.dart';
 
 void main() {
   print('=====================================================');

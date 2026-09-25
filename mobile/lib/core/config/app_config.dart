@@ -35,18 +35,50 @@ class AppConfig {
     return _current!;
   }
 
-  static void initialize(Environment env) {
-    switch (env) {
+  static void initialize([Environment? env]) {
+    const customApiUrl = String.fromEnvironment('API_BASE_URL');
+    const customEnvName = String.fromEnvironment('APP_ENV');
+
+    Environment selectedEnv = env ?? (kReleaseMode ? Environment.production : Environment.development);
+    if (customEnvName.isNotEmpty) {
+      final normalized = customEnvName.toLowerCase();
+      if (normalized == 'production' || normalized == 'prod') {
+        selectedEnv = Environment.production;
+      } else if (normalized == 'staging') {
+        selectedEnv = Environment.staging;
+      } else if (normalized == 'development' || normalized == 'dev') {
+        selectedEnv = Environment.development;
+      }
+    }
+
+    final String resolvedApiUrl;
+    if (customApiUrl.isNotEmpty) {
+      resolvedApiUrl = customApiUrl;
+    } else {
+      switch (selectedEnv) {
+        case Environment.production:
+          resolvedApiUrl = 'https://api.smritisetu.gov.in/api/v1';
+          break;
+        case Environment.staging:
+          resolvedApiUrl = 'https://staging-api.smritisetu.gov.in/api/v1';
+          break;
+        case Environment.development:
+          resolvedApiUrl = kIsWeb
+              ? 'http://localhost:3000/api/v1'
+              : (defaultTargetPlatform == TargetPlatform.android
+                  ? 'http://10.0.2.2:3000/api/v1'
+                  : 'http://localhost:3000/api/v1');
+          break;
+      }
+    }
+
+    switch (selectedEnv) {
       case Environment.development:
         _current = AppConfig._(
           environment: Environment.development,
           appName: 'SmritiSetu [DEV]',
           appVersion: '1.0.0-dev',
-          apiBaseUrl: kIsWeb
-              ? 'http://localhost:3000/api/v1'
-              : (defaultTargetPlatform == TargetPlatform.android
-                  ? 'http://10.0.2.2:3000/api/v1'
-                  : 'http://localhost:3000/api/v1'),
+          apiBaseUrl: resolvedApiUrl,
           apiTimeout: const Duration(seconds: 15),
           syncIntervalSeconds: 30,
           syncBatchSize: 10,
@@ -59,12 +91,12 @@ class AppConfig {
         break;
 
       case Environment.staging:
-        _current = const AppConfig._(
+        _current = AppConfig._(
           environment: Environment.staging,
           appName: 'SmritiSetu [STAGING]',
           appVersion: '1.0.0-rc1',
-          apiBaseUrl: 'https://staging-api.smritisetu.gov.in/api/v1',
-          apiTimeout: Duration(seconds: 20),
+          apiBaseUrl: resolvedApiUrl,
+          apiTimeout: const Duration(seconds: 20),
           syncIntervalSeconds: 60,
           syncBatchSize: 25,
           enableLogging: true,
@@ -76,12 +108,12 @@ class AppConfig {
         break;
 
       case Environment.production:
-        _current = const AppConfig._(
+        _current = AppConfig._(
           environment: Environment.production,
           appName: 'SmritiSetu',
           appVersion: '1.0.0',
-          apiBaseUrl: 'https://api.smritisetu.gov.in/api/v1',
-          apiTimeout: Duration(seconds: 10),
+          apiBaseUrl: resolvedApiUrl,
+          apiTimeout: const Duration(seconds: 10),
           syncIntervalSeconds: 60,
           syncBatchSize: 25,
           enableLogging: false,
