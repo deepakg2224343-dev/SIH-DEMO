@@ -44,7 +44,7 @@ jobs:
           if [ ! -f "android/gradlew" ]; then
             echo "Generating Android wrapper assets..."
             flutter create --platforms=android --org com.smritisetu .
-            git checkout android/app/build.gradle android/app/src/main/AndroidManifest.xml android/settings.gradle || true
+            git checkout android/app/build.gradle android/app/src/main/AndroidManifest.xml android/settings.gradle test/ || true
           fi
           chmod +x android/gradlew || true
 
